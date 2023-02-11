@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import requests
 import sys
@@ -13,7 +15,7 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     s = requests.Session()
     for i, word in enumerate(kanji):
         if pd.isnull(f.loc[i, audioPos]):
-            url = baseURL + phon[i]
+            url = baseURL + str(phon[i])
             print(word, url)
             try:
                 audio = s.get(url)
@@ -32,6 +34,19 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     f.to_csv('/home/thomas/Documents/' + csvOut, sep="\t", header=None, index=False)
 
 
+def clearMP3s():
+    confirm = input("Clear MP3s by suffix? Y/N: ")
+    if confirm == "yes" or confirm == "Yes" or confirm == "y" or confirm == "Y":
+        suffix = input("Clear all MP3s with suffix: ")
+        for file in os.listdir("/home/thomas/.local/share/Anki2/User 1/collection.media/"):
+            if file.endswith("_" + suffix + ".mp3"):
+                try:
+                    os.remove("/home/thomas/.local/share/Anki2/User 1/collection.media/" + file)
+                    print("Removed file " + file)
+                except:
+                    print("Error removing file " + file)
+
+
 def main():
     languages = [["ja", "japan", "jpn", "japanese", "japn"],
                  ["zh-CN", "chinese", "simplified", "china", "chin"]
@@ -40,24 +55,28 @@ def main():
     wP = 0
     sP = 1
     aP = 3
-    if len(sys.argv) > 2:
-        wP = int(sys.arv[2])
-    if len(sys.argv) > 3:
-        sP = int(sys.argv[3])
-    if len(sys.argv) > 4:
-        aP = int(sys.argv[4])
-    if len(sys.argv) > 1:
-        l = sys.argv[1]
-        lang = None
-        for language in languages:
-            if l in language:
-                lang = language[0]
 
-        if lang:
-            csvIn = input("CSV file name: ")
-            csvOut = input("Modified csv file name: ")
-            suffix = input("MP3 suffix: ")
-            addAudio(lang, wP, sP, aP, csvIn, csvOut, suffix)
+    if len(sys.argv) > 1 and sys.argv[1] == 'clear':
+        clearMP3s()
+    else:
+        if len(sys.argv) > 2:
+            wP = int(sys.arv[2])
+        if len(sys.argv) > 3:
+            sP = int(sys.argv[3])
+        if len(sys.argv) > 4:
+            aP = int(sys.argv[4])
+        if len(sys.argv) > 1:
+            l = sys.argv[1]
+            lang = None
+            for language in languages:
+                if l in language:
+                    lang = language[0]
+
+            if lang:
+                csvIn = input("CSV file name: ")
+                csvOut = input("Modified csv file name: ")
+                suffix = input("MP3 suffix: ")
+                addAudio(lang, wP, sP, aP, csvIn, csvOut, suffix)
 
 
 main()
