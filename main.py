@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import requests
 import sys
+import re
 
 
 def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
@@ -10,12 +11,18 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     f = pd.read_csv('~/Documents/' + csvIn, sep='\t', header=None, on_bad_lines='skip')
     destination = '/home/thomas/.local/share/Anki2/User 1/collection.media/'
     kanji = f[wordPos]
-    phon = f[phonPos]
+    phon = f[phonPos]  # kana/pinyin slot
 
     s = requests.Session()
     for i, word in enumerate(kanji):
         if pd.isnull(f.loc[i, audioPos]):
-            url = baseURL + str(phon[i])
+            p = phon[i]
+            if pd.isnull(f.loc[i, phonPos]):  # if phonetic section is null use kanji
+                p = word
+
+            if word[0] == "<":
+                word = re.sub('<[^<]+?>', '', word)
+            url = baseURL + str(p)
             print(word, url)
             try:
                 audio = s.get(url)
@@ -47,6 +54,16 @@ def clearMP3s():
                     print("Error removing file " + file)
 
 
+def clearTags(csvIn, csvOut):
+    f = pd.read_csv('~/Documents/' + csvIn, sep='\t', header=None, on_bad_lines='skip')
+    kanjiList = f[0]
+    for i, kanji in enumerate(kanjiList):
+        k = re.sub('<[^<]+?>', '', kanji)
+        if k != kanji:
+            f[0][i] = k
+    f.to_csv('/home/thomas/Documents/' + csvOut, sep="\t", header=None, index=False)
+
+
 def main():
     languages = [["ja", "japan", "jpn", "japanese", "japn"],
                  ["zh-CN", "chinese", "simplified", "china", "chin"]
@@ -58,6 +75,10 @@ def main():
 
     if len(sys.argv) > 1 and sys.argv[1] == 'clear':
         clearMP3s()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'ct':
+        csvIn = input("CSV file name: ")
+        csvOut = input("Modified csv file name: ")
+        clearTags(csvIn, csvOut)
     else:
         if len(sys.argv) > 2:
             wP = int(sys.arv[2])
