@@ -54,7 +54,7 @@ def clearMP3s():
                     print("Error removing file " + file)
 
 
-def clearTags(csvIn, csvOut):
+def stripHTML(csvIn, csvOut):
     f = pd.read_csv('~/Documents/' + csvIn, sep='\t', header=None, on_bad_lines='skip')
     kanjiList = f[0]
     for i, kanji in enumerate(kanjiList):
@@ -62,6 +62,18 @@ def clearTags(csvIn, csvOut):
         if k != kanji:
             f[0][i] = k
     f.to_csv('/home/thomas/Documents/' + csvOut, sep="\t", header=None, index=False)
+
+
+def printHelp():
+    print("syntax of command:")
+    print("python ./ttmp3_gt.py language [word column no] [phonetic column no] [audio tag column no]")
+    print("column no refers to the zero indexed column number in the tsv, default positions are 0, 1, and 3\n")
+
+    print("python ./ttmp3_gt.py strip")
+    print("remove all html tags from tsv\n")
+
+    print("python ./ttmp3_gt.py del_suffix")
+    print("remove all mp3s based on suffix")
 
 
 def main():
@@ -72,25 +84,26 @@ def main():
     wP = 0
     sP = 1
     aP = 3
-
-    if len(sys.argv) > 1 and sys.argv[1] == 'clear':
+    if len(sys.argv) == 1 or sys.argv[1] == '-h' or sys.argv[1] == 'h' or sys.argv[1] == 'help':
+        printHelp()
+    elif len(sys.argv) > 1 and sys.argv[1] == 'del_suffix':
         clearMP3s()
-    elif len(sys.argv) > 1 and sys.argv[1] == 'ct':
+    elif len(sys.argv) > 1 and sys.argv[1] == 'strip':
         csvIn = input("CSV file name: ")
         csvOut = input("Modified csv file name: ")
-        clearTags(csvIn, csvOut)
+        stripHTML(csvIn, csvOut)
     else:
-        if len(sys.argv) > 2:
-            wP = int(sys.arv[2])
-        if len(sys.argv) > 3:
-            sP = int(sys.argv[3])
         if len(sys.argv) > 4:
             aP = int(sys.argv[4])
+        if len(sys.argv) > 3:
+            sP = int(sys.argv[3])
+        if len(sys.argv) > 2:
+            wP = int(sys.arv[2])
         if len(sys.argv) > 1:
-            l = sys.argv[1]
+            langChoice = sys.argv[1]
             lang = None
             for language in languages:
-                if l in language:
+                if langChoice in language:
                     lang = language[0]
 
             if lang:
