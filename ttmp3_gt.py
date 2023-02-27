@@ -78,7 +78,8 @@ def printHelp():
 
 def main():
     languages = [["ja", "japan", "jpn", "japanese", "japn"],
-                 ["zh-CN", "chinese", "simplified", "china", "chin"]
+                 ["zh-CN", "chinese", "simplified", "china", "chin"],
+                 ["ru", "rus", "russian", "russia"]
                  ]
 
     wP = 0
@@ -98,9 +99,10 @@ def main():
         if len(sys.argv) > 3:
             sP = int(sys.argv[3])
         if len(sys.argv) > 2:
-            wP = int(sys.arv[2])
+            wP = int(sys.argv[2])
         if len(sys.argv) > 1:
             langChoice = sys.argv[1]
+            # print(aP, sP, wP)
             lang = None
             for language in languages:
                 if langChoice in language:
