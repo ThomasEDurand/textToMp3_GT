@@ -76,6 +76,19 @@ def printHelp():
     print("remove all mp3s based on suffix")
 
 
+def getDefaults(lang):
+    f = open("defaults.txt")
+    lines = f.readlines()
+
+    for line in lines:
+        l = line.split()
+        if l[0] == lang:
+            return int(l[1]), int(l[2]), int(l[3])
+
+    print("Not found in defaults")
+    return 0, 1, 2
+
+
 def main():
     languages = [["ja", "japan", "jpn", "japanese", "japn"],
                  ["zh-CN", "chinese", "simplified", "china", "chin"],
@@ -85,6 +98,7 @@ def main():
     wP = 0
     sP = 1
     aP = 3
+
     if len(sys.argv) == 1 or sys.argv[1] == '-h' or sys.argv[1] == 'h' or sys.argv[1] == 'help':
         printHelp()
     elif len(sys.argv) > 1 and sys.argv[1] == 'del_suffix':
@@ -107,6 +121,7 @@ def main():
             for language in languages:
                 if langChoice in language:
                     lang = language[0]
+                    wP, sP, aP = getDefaults(lang)
 
             if lang:
                 csvIn = input("CSV file name: ")
