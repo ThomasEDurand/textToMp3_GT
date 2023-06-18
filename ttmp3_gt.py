@@ -13,9 +13,12 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     kanji = f[wordPos]
     phon = f[phonPos]  # kana/pinyin slot
 
+    successive_failures = 0
     s = requests.Session()
     for i, word in enumerate(kanji):
-        if pd.isnull(f.loc[i, audioPos]):
+        if f.loc[i, 0][0] == "#":
+            None
+        elif pd.isnull(f.loc[i, audioPos]):
             p = phon[i]
             if pd.isnull(f.loc[i, phonPos]):  # if phonetic section is null use kanji
                 p = word
@@ -24,19 +27,29 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
                 word = re.sub('<[^<]+?>', '', word)
             url = baseURL + str(p)
             print(word, url)
+            write = False
             try:
                 audio = s.get(url)
+                if audio.status_code == 200:
+                    write = True
+                    successive_failures = 0
+                else:
+                    successive_failures += 1
+                    if successive_failures == 5:
+                        print("EXITING DUE TO SUCCESSIVE FAILURES")
+                        f.to_csv('/home/thomas/Documents/' + csvOut, sep="\t", header=None, index=False)
+                        return
 
             except:
                 print("error getting " + word)
 
-            fileName = str(i) + "_" + word + "_" + suffix + ".mp3"
-            try:
-
-                open(destination + fileName, 'wb').write(audio.content)
-                f[audioPos][i] = "[sound:" + fileName + "]"
-            except:
-                print("error writing file " + fileName + " to " + destination)
+            if write:
+                fileName = str(i) + "_" + word + "_" + suffix + ".mp3"
+                try:
+                    open(destination + fileName, 'wb').write(audio.content)
+                    f[audioPos][i] = "[sound:" + fileName + "]"
+                except:
+                    print("error writing file " + fileName + " to " + destination)
 
     f.to_csv('/home/thomas/Documents/' + csvOut, sep="\t", header=None, index=False)
 
