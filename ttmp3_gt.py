@@ -8,7 +8,7 @@ import re
 
 def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     baseURL = "https://translate.google.com/translate_tts?ie=UTF-&&client=tw-ob&tl=" + lang + "&q="
-    f = pd.read_csv('~/Documents/' + csvIn, sep='\t', header=None, on_bad_lines='skip')
+    f = pd.read_csv('~/Documents/' + csvIn, sep='\t', header=None,  comment='#', on_bad_lines='skip')
     destination = '/home/thomas/.local/share/Anki2/User 1/collection.media/'
     kanji = f[wordPos]
     phon = f[phonPos]  # kana/pinyin slot
@@ -16,7 +16,8 @@ def addAudio(lang, wordPos, phonPos, audioPos, csvIn, csvOut, suffix):
     successive_failures = 0
     s = requests.Session()
     for i, word in enumerate(kanji):
-        if f.loc[i, 0][0] == "#":
+        if f.loc[i, 0][0] == '#':
+            print("FOOO")
             None
         elif pd.isnull(f.loc[i, audioPos]):
             p = phon[i]
